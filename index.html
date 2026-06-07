@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#87CEEB">
+<link rel="manifest" href="/manifest.json">
+<title>STEP BY STEP ☁️</title>
+<style>
+:root {
+  --sky: #87CEEB; --white: #fff; --card: rgba(255,255,255,0.92);
+  --text: #2C3E50; --sub: #5A6C7D; --blue: #4D96FF; --green: #6BCB77;
+  --yellow: #FFD93D; --red: #FF6B6B; --radius: 22px; --shadow: 0 4px 24px rgba(44,62,80,0.08);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: linear-gradient(180deg, #87CEEB 0%, #C5E8FF 40%, #E8F4FD 100%);
+  min-height: 100vh; color: var(--text); -webkit-tap-highlight-color: transparent;
+}
+
+/* 云朵 */
+.clouds { position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+.cloud { position:absolute; background:var(--white); border-radius:50%; opacity:0.6; }
+.cloud::before,.cloud::after { content:''; position:absolute; background:inherit; border-radius:50%; }
+.c1 { width:130px; height:55px; top:6%; left:-150px; border-radius:55px; animation:fly 38s linear infinite; }
+.c1::before { width:65px; height:65px; top:-32px; left:22px; }
+.c1::after { width:55px; height:55px; top:-22px; left:60px; }
+.c2 { width:100px; height:42px; top:16%; left:-120px; border-radius:42px; animation:fly 32s 8s linear infinite; }
+.c2::before { width:50px; height:50px; top:-25px; left:16px; }
+.c2::after { width:42px; height:42px; top:-18px; left:48px; }
+.c3 { width:150px; height:60px; top:10%; left:-180px; border-radius:60px; animation:fly 44s 15s linear infinite; }
+.c3::before { width:72px; height:72px; top:-36px; left:28px; }
+.c3::after { width:60px; height:60px; top:-26px; left:70px; }
+@keyframes fly {
+  0% { transform:translateX(0) translateY(0); }
+  30% { transform:translateX(30vw) translateY(-8px); }
+  60% { transform:translateX(65vw) translateY(4px); }
+  100% { transform:translateX(110vw) translateY(0); }
+}
+
+#app { position:relative; z-index:1; max-width:440px; margin:0 auto; padding:16px; min-height:100vh; }
+
+/* 通用 */
+.card { background:var(--card); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); margin-bottom:14px; backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,0.6); }
+.btn { display:block; width:100%; padding:15px; border:none; border-radius:50px; font-size:17px; font-weight:700; cursor:pointer; text-align:center; font-family:inherit; transition:transform 0.15s; }
+.btn:active { transform:scale(0.96); }
+.btn-blue { background:linear-gradient(135deg,var(--blue),#6BB5FF); color:#fff; box-shadow:0 4px 16px rgba(77,150,255,0.3); }
+.btn-green { background:linear-gradient(135deg,var(--green),#5CBF6B); color:#fff; box-shadow:0 4px 16px rgba(107,203,119,0.3); }
+.btn-outline { background:transparent; color:var(--blue); border:2px solid var(--blue); }
+.btn:disabled { opacity:0.4; pointer-events:none; }
+.center { text-align:center; }
+.title { text-align:center; font-size:28px; font-weight:800; padding:28px 0 8px;
+  background: linear-gradient(135deg, var(--blue), #6BB5FF);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.subtitle { text-align:center; font-size:14px; color:var(--sub); margin-bottom:20px; }
+.emoji-lg { font-size:56px; }
+.progress { height:7px; background:rgba(77,150,255,0.12); border-radius:4px; margin:10px 0; overflow:hidden; }
+.progress-bar { height:100%; background:linear-gradient(90deg,var(--blue),var(--green)); border-radius:4px; transition:width 0.3s; }
+
+/* 心情 */
+.mood-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:16px 0; }
+.mood-btn { padding:18px 10px; border-radius:18px; border:3px solid transparent; background:rgba(255,255,255,0.85); text-align:center; cursor:pointer; transition:all 0.2s; }
+.mood-btn:active { transform:scale(0.94); }
+.mood-btn.sel { border-color:var(--blue); background:#fff; box-shadow:0 4px 20px rgba(77,150,255,0.18); }
+.mood-emoji { font-size:42px; display:block; margin-bottom:4px; }
+.mood-label { font-size:15px; font-weight:600; }
+
+/* 输入 */
+textarea.input { width:100%; padding:14px; border-radius:16px; border:2px solid rgba(77,150,255,0.2); font-size:16px; font-family:inherit; resize:none; min-height:110px; line-height:1.6; background:rgba(255,255,255,0.8); }
+textarea.input:focus { outline:none; border-color:var(--blue); }
+
+/* 语音按钮 */
+.voice-btn { display:inline-flex; align-items:center; gap:6px; padding:10px 18px; border-radius:50px; border:2px solid var(--yellow); background:rgba(255,217,61,0.08); cursor:pointer; font-size:14px; font-family:inherit; margin-top:10px; }
+.voice-btn.rec { background:var(--red); color:#fff; border-color:var(--red); animation:pulse 1s infinite; }
+@keyframes pulse { 0%,100% { box-shadow:0 0 0 0 rgba(255,107,107,0.4); } 50% { box-shadow:0 0 0 14px rgba(255,107,107,0); } }
+.voice-hint { font-size:11px; color:var(--sub); text-align:center; margin-top:4px; }
+
+/* 登录 */
+.pin-ct { display:flex; gap:10px; justify-content:center; margin:16px 0; }
+.pin-dot { width:14px; height:14px; border-radius:50%; border:2px solid rgba(77,150,255,0.3); }
+.pin-dot.filled { background:var(--blue); border-color:var(--blue); }
+.pin-pad { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; max-width:260px; margin:0 auto; }
+.pin-key { width:68px; height:68px; border-radius:50%; border:none; background:rgba(255,255,255,0.82); font-size:22px; font-weight:600; cursor:pointer; font-family:inherit; color:var(--text); box-shadow:0 2px 8px rgba(0,0,0,0.05); }
+.pin-key:active { transform:scale(0.9); background:#fff; }
+
+/* 报告 */
+.report { background:var(--card); border-radius:var(--radius); padding:24px; box-shadow:var(--shadow); line-height:1.8; font-size:15px; white-space:pre-wrap; max-height:65vh; overflow-y:auto; margin-bottom:14px; }
+
+/* 导航 */
+.nav { display:flex; gap:4px; padding:8px; background:rgba(255,255,255,0.85); border-radius:22px 22px 0 0; backdrop-filter:blur(10px); margin-top:auto; }
+.nav-btn { flex:1; text-align:center; padding:10px 4px; border-radius:14px; cursor:pointer; font-size:12px; color:var(--sub); border:none; background:none; font-family:inherit; }
+.nav-btn.active { color:var(--blue); background:rgba(77,150,255,0.08); font-weight:600; }
+.nav-emoji { display:block; font-size:20px; margin-bottom:2px; }
+
+/* Toast */
+.toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:var(--text); color:#fff; padding:12px 24px; border-radius:50px; font-size:14px; z-index:999; animation:toastIn 0.3s; }
+@keyframes toastIn { from { opacity:0; transform:translateX(-50%) translateY(10px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
+
+.spinner { width:28px; height:28px; border:3px solid rgba(77,150,255,0.15); border-top-color:var(--blue); border-radius:50%; animation:spin 0.7s linear infinite; margin:14px auto; }
+@keyframes spin { to { transform:rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="clouds">
+  <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div>
+</div>
+
+<div id="app"></div>
+
+<script>
+/* ========== 🔧 工具函数 ========== */
+function $(id) { return document.getElementById(id); }
+function today() { return new Date().toISOString().slice(0,10); }
+function dayName(d) { return ['周日','周一','周二','周三','周四','周五','周六'][new Date(d+'T00:00:00').getDay()]; }
+function showToast(msg) {
+  var t = document.querySelector('.toast'); if (t) t.remove();
+  t = document.createElement('div'); t.className='toast'; t.textContent=msg;
+  document.body.appendChild(t); setTimeout(function(){ t.remove(); },2200);
+}
+
+/* ========== 💾 数据存储（localStorage + 简易加密） ========== */
+var DB = {
+  encrypt: function(text, pin) {
+    // 简易 XOR + Base64（生产可用 Web Crypto，先保证能用）
+    var key = pin.split('').map(function(c){return c.charCodeAt(0);});
+    var out = '';
+    for (var i=0; i<text.length; i++) {
+      out += String.fromCharCode(text.charCodeAt(i) ^ key[i % key.length]);
+    }
+    return btoa(unescape(encodeURIComponent(out)));
+  },
+  decrypt: function(enc, pin) {
+    try {
+      var text = decodeURIComponent(escape(atob(enc)));
+      var key = pin.split('').map(function(c){return c.charCodeAt(0);});
+      var out = '';
+      for (var i=0; i<text.length; i++) {
+        out += String.fromCharCode(text.charCodeAt(i) ^ key[i % key.length]);
+      }
+      return out;
+    } catch(e) { return null; }
+  },
+  saveEntry: function(date, data, pin) {
+    var all = this.getAllEntries(pin) || {};
+    all[date] = data;
+    var enc = this.encrypt(JSON.stringify(all), pin);
+    localStorage.setItem('sbs_data', enc);
+  },
+  getAllEntries: function(pin) {
+    var enc = localStorage.getItem('sbs_data');
+    if (!enc) return {};
+    var dec = this.decrypt(enc, pin);
+    if (!dec) return null; // 密码错误
+    try { return JSON.parse(dec); } catch(e) { return {}; }
+  },
+  saveReport: function(key, content) {
+    var reports = JSON.parse(localStorage.getItem('sbs_reports') || '{}');
+    reports[key] = content;
+    localStorage.setItem('sbs_reports', JSON.stringify(reports));
+  },
+  getReport: function(key) {
+    var reports = JSON.parse(localStorage.getItem('sbs_reports') || '{}');
+    return reports[key] || null;
+  }
+};
+
+/* ========== 🔐 登录模块 ========== */
+function needsSetup() { return !localStorage.getItem('sbs_salt'); }
+function getPin() { return sessionStorage.getItem('sbs_pin') || ''; }
+function setPin(p) { sessionStorage.setItem('sbs_pin', p); }
+function getNickname() {
+  try { return localStorage.getItem('sbs_nickname') || '朋友'; } catch(e) { return '朋友'; }
+}
+function setNickname(n) { localStorage.setItem('sbs_nickname', n); }
+
+function setupAccount(nickname, pin) {
+  if (!nickname || nickname.trim() === '') { showToast('请输入你的昵称'); return false; }
+  if (pin.length < 6) { showToast('密码至少需要6位数字哦'); return false; }
+  var enc = DB.encrypt('stepbystep_ok', pin);
+  localStorage.setItem('sbs_salt', 'v1');
+  localStorage.setItem('sbs_verify', enc);
+  setPin(pin);
+  setNickname(nickname.trim());
+  DB.saveEntry('_init_', { created: today(), nickname: nickname.trim() }, pin);
+  showToast('设置成功！欢迎 ' + nickname.trim());
+  return true;
+}
+
+function loginCheck(pin) {
+  var enc = localStorage.getItem('sbs_verify');
+  if (!enc) return false;
+  var dec = DB.decrypt(enc, pin);
+  if (dec === 'stepbystep_ok') {
+    setPin(pin);
+    return true;
+  }
+  return false;
+}
+
+/* ========== 🎤 语音模块 ========== */
+var Voice = {
+  rec: null, recording: false,
+  init: function() {
+    var R = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (R) { this.rec = new R(); this.rec.lang='zh-CN'; this.rec.interimResults=false; this.rec.maxAlternatives=1; }
+    return !!this.rec;
+  },
+  start: function(onResult, onEnd) {
+    var self = this;
+    if (!this.rec) { showToast('浏览器不支持语音识别'); return; }
+    this.rec.onresult = function(e) { onResult(e.results[0][0].transcript); };
+    this.rec.onend = function() { self.recording=false; if(onEnd) onEnd(); };
+    this.rec.onerror = function(e) { self.recording=false; showToast('语音识别失败: '+e.error); if(onEnd) onEnd(); };
+    try { this.rec.start(); this.recording=true; } catch(e) {}
+  },
+  stop: function() { if(this.rec) try{this.rec.stop();}catch(e){} this.recording=false; }
+};
+
+/* ========== 🤖 AI 模块（通过后端代理调智谱） ========== */
+function callAI(messages, type, callback) {
+  fetch('/api/agent', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messages: messages, type: type })
+  }).then(function(r) {
+    if (!r.ok) throw new Error('API error: '+r.status);
+    return r.json();
+  }).then(function(data) {
+    callback(data.content || '');
+  }).catch(function(e) {
+    callback('AI 暂不可用。\n\n错误：'+e.message);
+  });
+}
+
+function buildAIPrompt(entries, type) {
+  var moodMap = {1:'很糟',2:'一般',3:'还行',4:'不错'};
+  var text = '';
+  if (type === 'daily') {
+    var e = entries;
+    text = '请根据以下今天的打卡内容，生成今日小记：\n\n';
+    text += '心情：'+moodMap[e.mood]+'\n';
+    text += '完成的事：'+(e.completed||'未填')+'\n';
+    text += '喜悦的事：'+(e.joy||'未填')+'\n';
+    text += '消耗的事：'+(e.drain||'未填')+'\n';
+    text += '明天计划：'+(e.plan||'未填');
+  } else {
+    var label = type==='weekly'?'周':'月';
+    text = '以下是我这'+label+'的打卡记录：\n\n';
+    entries.forEach(function(e) {
+      var d = e.data || e;
+      text += '📅 '+e.date+' | 心情：'+moodMap[d.mood]+' | 完成：'+(d.completed||'-')+' | 喜悦：'+(d.joy||'-')+' | 消耗：'+(d.drain||'-')+' | 计划：'+(d.plan||'-')+'\n';
+    });
+    text += '\n请根据以上数据生成'+label+'记。';
+  }
+  return [{ role: 'user', content: text }];
+}
+
+/* ========== 📱 页面渲染 ========== */
+var App = {
+  page: 0, data: { mood:null, completed:'', joy:'', drain:'', plan:'' },
+  backfillDate: null,
+
+  renderHome: function() {
+    var pin = getPin();
+    var entries = DB.getAllEntries(pin) || {};
+    var td = today();
+    var todayEntry = entries[td];
+    var streak = this._calcStreak(entries);
+
+    var nickname = getNickname();
+    var h = '<div class="title">☁️ STEP BY STEP</div>';
+    h += '<div class="center" style="font-size:15px;color:var(--sub);margin-bottom:16px">'+nickname+' · '+td+' '+dayName(td)+' · 🔥 连续 '+streak+' 天</div>';
+
+    if (todayEntry) {
+      var moods = ['','😞','😐','🙂','😊'];
+      h += '<div class="card center"><div class="emoji-lg">'+(moods[todayEntry.mood]||'📝')+'</div>';
+      h += '<p style="font-weight:600">今日已完成打卡</p>';
+      h += '<p style="font-size:13px;color:var(--sub);margin-top:4px">'+(todayEntry.completed||'').slice(0,35)+'</p>';
+
+      // 今日 AI 小结
+      var rkey = 'daily_'+td;
+      var report = DB.getReport(rkey);
+      if (report) {
+        h += '<div style="margin-top:12px;padding:12px;background:rgba(77,150,255,0.04);border-radius:14px;font-size:14px;line-height:1.7;text-align:left">'+report.replace(/\n/g,'<br>')+'</div>';
+      }
+      h += '</div>';
+    } else {
+      h += '<div class="card center"><div class="emoji-lg">📝</div>';
+      h += '<p style="font-weight:600">今天还没打卡哦</p>';
+      h += '<button class="btn btn-blue" style="margin-top:12px" onclick="App.startCheckin()">✍️ 开始打卡</button></div>';
+    }
+
+    // 快捷按钮
+    h += '<div class="card" style="display:flex;gap:8px">';
+    h += '<button class="btn btn-outline" style="flex:1;font-size:14px;padding:12px" onclick="App.showReport(\'weekly\')">📊 周报</button>';
+    h += '<button class="btn btn-outline" style="flex:1;font-size:14px;padding:12px" onclick="App.showReport(\'monthly\')">📈 月报</button>';
+    h += '<button class="btn btn-outline" style="flex:1;font-size:14px;padding:12px" onclick="App.showHistory()">📅 历史</button>';
+    h += '</div>';
+
+    h += this._nav('home');
+    this.render(h, 'home');
+  },
+
+  startCheckin: function() {
+    this.page = 0;
+    this.data = { mood:null, completed:'', joy:'', drain:'', plan:'' };
+    this.renderCheckin();
+  },
+
+  renderCheckin: function() {
+    var pages = [
+      { title:'今天怎么样？', type:'mood' },
+      { title:'今天完成了什么事情？', type:'text', field:'completed', hint:'比如：完成了工作报告、去了健身房、读了一章书...' },
+      { title:'有没有让你觉得很有成就感\n或者内心喜悦的事情？', type:'text', field:'joy', hint:'比如：帮同事解决了一个难题、做了一顿好吃的饭...' },
+      { title:'有没有被什么事情\n消耗你的能量心力？', type:'text', field:'drain', hint:'比如：重复的行政事务、一次不愉快的沟通...' },
+      { title:'关于明天，你有什么计划嘛？', type:'text', field:'plan', hint:'比如：明天把方案写完、约朋友喝咖啡...' }
+    ];
+    var p = pages[this.page];
+    var body = '';
+
+    if (p.type === 'mood') {
+      var moods = [
+        { e:'😞', l:'很糟', v:1, c:'var(--red)' },
+        { e:'😐', l:'一般', v:2, c:'var(--yellow)' },
+        { e:'🙂', l:'还行', v:3, c:'var(--green)' },
+        { e:'😊', l:'不错', v:4, c:'var(--blue)' }
+      ];
+      body = '<div class="mood-grid">';
+      moods.forEach(function(m) {
+        var sel = App.data.mood === m.v ? ' sel' : '';
+        body += '<div class="mood-btn'+sel+'" onclick="App.pickMood('+m.v+')">';
+        body += '<span class="mood-emoji">'+m.e+'</span>';
+        body += '<span class="mood-label">'+m.l+'</span></div>';
+      });
+      body += '</div>';
+    } else {
+      body = '<textarea class="input" id="checkin-ta" placeholder="'+p.hint+'">'+(this.data[p.field]||'')+'</textarea>';
+      if (Voice.init()) {
+        body += '<button class="voice-btn" id="voice-btn" onclick="App.toggleVoice()">🎤 语音输入</button>';
+        body += '<div class="voice-hint" id="voice-hint"></div>';
+      }
+    }
+
+    var h = '<div class="title">☁️ STEP BY STEP</div>';
+    h += '<div class="progress"><div class="progress-bar" style="width:'+((this.page+1)*20)+'%"></div></div>';
+    h += '<div class="center" style="font-size:13px;color:var(--sub);margin-bottom:8px">'+(this.page+1)+'/5</div>';
+    h += '<div class="card"><h2 class="center" style="white-space:pre-line;font-size:19px">'+p.title+'</h2>'+body;
+    var btnDisabled = (p.type==='mood' && !this.data.mood) ? ' disabled' : '';
+    var btnClass = this.page < 4 ? 'btn-blue' : 'btn-green';
+    var btnText = this.page < 4 ? '下一步 →' : '✨ 完成打卡';
+    h += '<button class="btn '+btnClass+'" style="margin-top:16px"'+btnDisabled+' onclick="App.nextPage()">'+btnText+'</button>';
+    h += '</div>';
+
+    this.render(h, 'checkin');
+  },
+
+  pickMood: function(v) {
+    this.data.mood = v;
+    this.renderCheckin();
+  },
+
+  nextPage: function() {
+    if (this.page > 0) {
+      var fields = ['','completed','joy','drain','plan'];
+      var ta = $('checkin-ta');
+      if (ta) this.data[fields[this.page]] = ta.value;
+    }
+    this.page++;
+    if (this.page >= 5) {
+      this.submitCheckin();
+      return;
+    }
+    this.renderCheckin();
+  },
+
+  submitCheckin: function() {
+    var pin = getPin();
+    var date = this.backfillDate || today();
+    var entry = {
+      mood: this.data.mood, completed: this.data.completed,
+      joy: this.data.joy, drain: this.data.drain, plan: this.data.plan
+    };
+    DB.saveEntry(date, entry, pin);
+
+    showToast('打卡完成！AI 正在生成小结...');
+
+    var self = this;
+    callAI(buildAIPrompt(entry, 'daily'), 'daily', function(content) {
+      DB.saveReport('daily_'+date, content);
+      self.backfillDate = null;
+      self.showSummary(content, date);
+    });
+  },
+
+  showSummary: function(content, date) {
+    var h = '<div class="title">✨ 今日小记</div>';
+    h += '<div class="center" style="color:var(--sub);font-size:13px;margin-bottom:12px">'+date+' '+dayName(date)+'</div>';
+    h += '<div class="report">'+content.replace(/\n/g,'<br>')+'</div>';
+    h += '<button class="btn btn-blue" onclick="App.showHome()">🏠 返回首页</button>';
+    this.render(h, 'summary');
+  },
+
+  showHome: function() {
+    this.renderHome();
+  },
+
+  showHistory: function() {
+    var pin = getPin();
+    var entries = DB.getAllEntries(pin) || {};
+    var list = Object.keys(entries).filter(function(k){return k!=='_init_';}).sort().reverse();
+
+    var h = '<div class="title">📅 打卡历史</div>';
+    h += '<div class="center" style="color:var(--sub);margin-bottom:12px">共 '+list.length+' 天</div>';
+
+    if (list.length === 0) {
+      h += '<div class="card center"><p>还没有记录</p><button class="btn btn-blue" style="margin-top:12px" onclick="App.startCheckin()">开始第一次打卡</button></div>';
+    } else {
+      list.slice(0,30).forEach(function(date) {
+        var e = entries[date];
+        var moods = ['','😞','😐','🙂','😊'];
+        h += '<div class="card" style="padding:14px;cursor:pointer" onclick="App.viewEntry(\''+date+'\')">';
+        h += '<div style="display:flex;justify-content:space-between;align-items:center">';
+        h += '<span><b>📅 '+date+'</b> '+dayName(date)+'</span>';
+        h += '<span style="font-size:28px">'+(moods[e.mood]||'❓')+'</span></div>';
+        h += '<div style="font-size:13px;color:var(--sub);margin-top:4px">'+(e.completed||'未填写').slice(0,35)+'</div></div>';
+      });
+    }
+
+    h += '<button class="btn btn-outline" style="margin-top:8px" onclick="App.showBackfill()">📝 补打卡（7天内）</button>';
+    h += this._nav('history');
+    this.render(h, 'history');
+  },
+
+  viewEntry: function(date) {
+    var pin = getPin();
+    var entries = DB.getAllEntries(pin) || {};
+    var e = entries[date];
+    if (!e) return;
+    var moods = ['','😞 很糟','😐 一般','🙂 还行','😊 不错'];
+    var report = DB.getReport('daily_'+date);
+
+    var h = '<div class="title">📝 打卡详情</div>';
+    h += '<div class="center" style="color:var(--sub)">'+date+' '+dayName(date)+' · '+(moods[e.mood]||'')+'</div>';
+    h += '<div class="card"><p><b>✅ 完成的事情</b></p><p style="color:var(--sub);margin:6px 0 14px">'+e.completed+'</p>';
+    h += '<p><b>🌟 成就感/喜悦</b></p><p style="color:var(--sub);margin:6px 0 14px">'+(e.joy||'-')+'</p>';
+    h += '<p><b>⚡ 消耗能量</b></p><p style="color:var(--sub);margin:6px 0 14px">'+(e.drain||'-')+'</p>';
+    h += '<p><b>🎯 明天计划</b></p><p style="color:var(--sub);margin:6px 0">'+(e.plan||'-')+'</p></div>';
+    if (report) {
+      h += '<div class="card"><p><b>🤖 AI 当日小记</b></p><p style="line-height:1.8;margin-top:8px">'+report.replace(/\n/g,'<br>')+'</p></div>';
+    }
+    h += '<button class="btn btn-outline" onclick="App.showHistory()">← 返回</button>';
+    this.render(h, 'entry');
+  },
+
+  showReport: function(type) {
+    var pin = getPin();
+    var entries = DB.getAllEntries(pin) || {};
+    var td = today();
+    var label, key, range;
+
+    if (type === 'weekly') {
+      var d = new Date(td+'T00:00:00');
+      var day = d.getDay();
+      var mon = new Date(d); mon.setDate(d.getDate() - (day===0?6:day-1));
+      var sun = new Date(mon); sun.setDate(mon.getDate()+6);
+      range = mon.toISOString().slice(0,10)+' — '+sun.toISOString().slice(0,10);
+      key = 'weekly_'+mon.toISOString().slice(0,10);
+      label = '📊 本周周记';
+    } else {
+      var dd = new Date(td+'T00:00:00');
+      var start = dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0')+'-01';
+      var end = dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0')+'-'+new Date(dd.getFullYear(),dd.getMonth()+1,0).getDate();
+      range = start+' — '+end;
+      key = 'monthly_'+start;
+      label = '📈 本月月记';
+    }
+
+    var existing = DB.getReport(key);
+    var h = '<div class="title">'+label+'</div>';
+    h += '<div class="center" style="color:var(--sub);margin-bottom:14px">'+range+'</div>';
+
+    if (existing) {
+      h += '<div class="report">'+existing.replace(/\n/g,'<br>')+'</div>';
+      h += '<button class="btn btn-outline" onclick="App.showHome()">🏠 返回</button>';
+    } else {
+      // 收集数据
+      var rangeEntries = [];
+      Object.keys(entries).forEach(function(date) {
+        if (date === '_init_') return;
+        if (date >= range.split(' — ')[0] && date <= range.split(' — ')[1]) {
+          rangeEntries.push({ date:date, data:entries[date] });
+        }
+      });
+      rangeEntries.sort(function(a,b){ return a.date.localeCompare(b.date); });
+
+      h += '<div class="card center"><p>共记录 <b>'+rangeEntries.length+'</b> 天</p>';
+      if (rangeEntries.length === 0) {
+        h += '<p style="color:var(--sub);font-size:13px">暂无数据</p>';
+        h += '<button class="btn btn-outline" style="margin-top:8px" onclick="App.showHome()">返回</button>';
+      } else {
+        h += '<button class="btn btn-blue" style="margin-top:12px" id="gen-btn" onclick="App.generateReport(\''+type+'\',\''+key+'\')">🤖 生成报告</button>';
+        h += '<div id="gen-spin" style="display:none"><div class="spinner"></div><p style="text-align:center;font-size:13px;color:var(--sub)">AI 正在撰写...</p></div>';
+        h += '<div id="gen-result"></div>';
+      }
+      h += '</div>';
+    }
+
+    h += this._nav(type==='weekly'?'weekly':'monthly');
+    this.render(h, type);
+  },
+
+  generateReport: function(type, key) {
+    var pin = getPin();
+    var entries = DB.getAllEntries(pin) || {};
+    var td = today();
+
+    var rangeStart, rangeEnd;
+    if (type === 'weekly') {
+      var d = new Date(td+'T00:00:00');
+      var day = d.getDay();
+      var mon = new Date(d); mon.setDate(d.getDate() - (day===0?6:day-1));
+      rangeStart = mon.toISOString().slice(0,10);
+      var sun = new Date(mon); sun.setDate(mon.getDate()+6);
+      rangeEnd = sun.toISOString().slice(0,10);
+    } else {
+      rangeStart = td.slice(0,7)+'-01';
+      var dd = new Date(td+'T00:00:00');
+      rangeEnd = td.slice(0,7)+'-'+new Date(dd.getFullYear(),dd.getMonth()+1,0).getDate();
+    }
+
+    var rangeEntries = [];
+    Object.keys(entries).forEach(function(date) {
+      if (date === '_init_') return;
+      if (date >= rangeStart && date <= rangeEnd) {
+        rangeEntries.push({ date:date, data:entries[date] });
+      }
+    });
+    rangeEntries.sort(function(a,b){ return a.date.localeCompare(b.date); });
+
+    // 检查缺失
+    var totalDays = type==='weekly' ? 7 : parseInt(rangeEnd.split('-')[2]);
+    if (rangeEntries.length < totalDays * 0.4) {
+      if (!confirm('只记录了 '+rangeEntries.length+' 天，确定要生成报告吗？\n建议先补完再生成。')) {
+        var btn = $('gen-btn'); if (btn) btn.style.display='block';
+        var spin = $('gen-spin'); if (spin) spin.style.display='none';
+        return;
+      }
+    }
+
+    var btn = $('gen-btn'); if (btn) btn.style.display='none';
+    var spin = $('gen-spin'); if (spin) spin.style.display='block';
+    var resultDiv = $('gen-result'); if (resultDiv) resultDiv.innerHTML='';
+
+    var self = this;
+    callAI(buildAIPrompt(rangeEntries, type), type, function(content) {
+      DB.saveReport(key, content);
+      if (spin) spin.style.display='none';
+      if (resultDiv) resultDiv.innerHTML = '<div class="report" style="margin-top:12px">'+content.replace(/\n/g,'<br>')+'</div>';
+      showToast('报告已生成！');
+    });
+  },
+
+  showBackfill: function() {
+    var pin = getPin();
+    var entries = DB.getAllEntries(pin) || {};
+    var td = today();
+    var options = '';
+
+    for (var i=1; i<=7; i++) {
+      var d = new Date(td+'T00:00:00');
+      d.setDate(d.getDate()-i);
+      var ds = d.toISOString().slice(0,10);
+      if (!entries[ds]) {
+        options += '<option value="'+ds+'">📅 '+ds+' '+dayName(ds)+'</option>';
+      }
+    }
+
+    var h = '<div class="title">📝 补打卡</div>';
+    if (!options) {
+      h += '<div class="card center"><p>过去7天都已打卡 🎉</p><button class="btn btn-outline" style="margin-top:8px" onclick="App.showHistory()">返回</button></div>';
+    } else {
+      h += '<div class="card center"><p style="margin-bottom:12px">选择要补打卡的日期</p>';
+      h += '<select id="bf-date" class="input" style="min-height:auto">'+options+'</select>';
+      h += '<button class="btn btn-blue" style="margin-top:12px" onclick="App.doBackfill()">开始补打卡</button>';
+      h += '<button class="btn btn-outline" style="margin-top:6px" onclick="App.showHistory()">取消</button></div>';
+    }
+    this.render(h, 'backfill');
+  },
+
+  doBackfill: function() {
+    var sel = $('bf-date');
+    if (!sel || !sel.value) return;
+    this.backfillDate = sel.value;
+    this.startCheckin();
+  },
+
+  showSettings: function() {
+    var h = '<div class="title">⚙️ 设置</div>';
+    h += '<div class="card">';
+    h += '<div style="padding:14px 0;border-bottom:1px solid rgba(0,0,0,0.05);cursor:pointer" onclick="App.exportData()"><b>📦 导出数据</b><p style="font-size:12px;color:var(--sub)">加密导出，换手机时用</p></div>';
+    h += '<div style="padding:14px 0;border-bottom:1px solid rgba(0,0,0,0.05);cursor:pointer" onclick="App.importData()"><b>📥 导入数据</b><p style="font-size:12px;color:var(--sub)">从备份文件恢复</p></div>';
+    h += '<div style="padding:14px 0;cursor:pointer" onclick="App.resetData()"><b style="color:var(--red)">🗑️ 清除数据</b><p style="font-size:12px;color:var(--sub)">不可撤销，请先备份</p></div>';
+    h += '</div>';
+    h += '<p class="center" style="font-size:11px;color:var(--sub);margin-top:12px">🔒 数据加密存储在你手机中</p>';
+    h += this._nav('settings');
+    this.render(h, 'settings');
+  },
+
+  exportData: function() {
+    var data = {
+      entries: localStorage.getItem('sbs_data') || '',
+      reports: localStorage.getItem('sbs_reports') || '',
+      verify: localStorage.getItem('sbs_verify') || '',
+      salt: localStorage.getItem('sbs_salt') || ''
+    };
+    var blob = new Blob([JSON.stringify(data)], {type:'application/json'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'stepbystep_'+today()+'.sbs';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('✅ 备份已下载');
+  },
+
+  importData: function() {
+    var inp = document.createElement('input');
+    inp.type='file'; inp.accept='.sbs,.json';
+    inp.onchange = function(e) {
+      var file = e.target.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function(ev) {
+        try {
+          var data = JSON.parse(ev.target.result);
+          if (data.entries) localStorage.setItem('sbs_data', data.entries);
+          if (data.reports) localStorage.setItem('sbs_reports', data.reports);
+          if (data.verify) localStorage.setItem('sbs_verify', data.verify);
+          if (data.salt) localStorage.setItem('sbs_salt', data.salt);
+          showToast('✅ 导入成功！请重新登录');
+          setTimeout(function(){ location.reload(); }, 1000);
+        } catch(ex) {
+          showToast('导入失败：文件格式错误');
+        }
+      };
+      reader.readAsText(file);
+    };
+    inp.click();
+  },
+
+  resetData: function() {
+    if (confirm('⚠️ 确定清除所有数据？\n此操作不可撤销！')) {
+      if (confirm('再次确认：真的要删除吗？')) {
+        localStorage.clear();
+        sessionStorage.clear();
+        showToast('已清除，请重新设置');
+        setTimeout(function(){ location.reload(); }, 800);
+      }
+    }
+  },
+
+  toggleVoice: function() {
+    if (Voice.recording) {
+      Voice.stop();
+      var btn = $('voice-btn'); if(btn){btn.classList.remove('rec');btn.textContent='🎤 语音输入';}
+      return;
+    }
+    var btn = $('voice-btn'); if(btn){btn.classList.add('rec');btn.textContent='⏺️ 正在听...';}
+    var hint = $('voice-hint'); if(hint) hint.textContent='请说话...';
+
+    var fields = ['','completed','joy','drain','plan'];
+    var field = fields[this.page];
+    var self = this;
+    Voice.start(function(text) {
+      self.data[field] = (self.data[field]||'') + text;
+      var ta = $('checkin-ta'); if (ta) ta.value = self.data[field];
+      if (hint) hint.textContent = '✅ 识别完成';
+    }, function() {
+      if (btn){btn.classList.remove('rec');btn.textContent='🎤 语音输入';}
+    });
+  },
+
+  _calcStreak: function(entries) {
+    var streak = 0;
+    var d = new Date(today()+'T00:00:00');
+    for (var i=0; i<365; i++) {
+      var ds = d.toISOString().slice(0,10);
+      if (entries[ds]) streak++;
+      else break;
+      d.setDate(d.getDate()-1);
+    }
+    return streak;
+  },
+
+  // 当前 PIN 输入状态
+  _pinBuf: '',
+  _setupStep: 1,  // 1=输密码, 2=确认密码
+  _setupFirstPin: '',
+
+  renderSetup: function() {
+    this._setupStep = 1;
+    this._setupFirstPin = '';
+    this._pinBuf = '';
+    var h = '<div class="title">☁️ 欢迎来到 STEP BY STEP</div>';
+    h += '<div class="subtitle">一步一步，看见成长的自己</div>';
+    h += '<div class="card center">';
+    h += '<div class="emoji-lg">🌻</div>';
+    h += '<p style="font-weight:600;margin:12px 0 4px">怎么称呼你？</p>';
+    h += '<input id="setup-nickname" class="input" style="min-height:auto;text-align:center;font-size:18px;margin-bottom:20px" placeholder="输入你的昵称" maxlength="20" autofocus>';
+    h += '<div style="width:100%;height:1px;background:rgba(0,0,0,0.06);margin-bottom:20px"></div>';
+    h += '<p style="font-weight:600;margin:0 0 4px">设置登录密码</p>';
+    h += '<p id="pin-hint" style="font-size:12px;color:var(--sub);margin-bottom:16px">6位数字密码 · 用来加密保护你的数据</p>';
+    h += '<div class="pin-ct">'+'<div class="pin-dot"></div>'.repeat(6)+'</div>';
+    h += '<div class="pin-pad">';
+    [1,2,3,4,5,6,7,8,9,'',0,'⌫'].forEach(function(k) {
+      if (k==='') h += '<div></div>';
+      else h += '<button class="pin-key" data-k="'+k+'">'+k+'</button>';
+    });
+    h += '</div>';
+    h += '<button id="pin-confirm" class="btn btn-blue" style="display:none;margin-top:14px" onclick="App.doSetupConfirm()">✅ 确认密码</button>';
+    h += '<p style="font-size:11px;color:var(--sub);margin-top:12px">⚠️ 忘记密码 = 数据永久无法恢复</p>';
+    h += '</div>';
+    this.render(h, 'setup');
+    this._bindPinInput();
+  },
+
+  renderLogin: function() {
+    this._pinBuf = '';
+    var name = getNickname();
+    var h = '<div class="title">☁️ STEP BY STEP</div>';
+    h += '<div class="subtitle">一步一步，看见成长的自己</div>';
+    h += '<div class="card center">';
+    h += '<div class="emoji-lg">👋</div>';
+    h += '<p style="font-size:22px;font-weight:700;margin:8px 0">'+name+'，欢迎回来</p>';
+    h += '<p style="font-size:13px;color:var(--sub);margin-bottom:18px">输入密码进入</p>';
+    h += '<div class="pin-ct">'+'<div class="pin-dot"></div>'.repeat(6)+'</div>';
+    h += '<div class="pin-pad">';
+    [1,2,3,4,5,6,7,8,9,'',0,'⌫'].forEach(function(k) {
+      if (k==='') h += '<div></div>';
+      else h += '<button class="pin-key" data-k="'+k+'">'+k+'</button>';
+    });
+    h += '</div>';
+    h += '<button id="pin-confirm" class="btn btn-blue" style="display:none;margin-top:14px" onclick="App.doLogin()">✅ 确认登录</button>';
+    h += '<p style="font-size:12px;color:var(--sub);margin-top:14px;cursor:pointer" onclick="if(confirm(\'重设将清除所有数据，确定？\')){localStorage.clear();sessionStorage.clear();location.reload()}">不是'+name+'？点此重设</p>';
+    h += '</div>';
+    this.render(h, 'login');
+    this._bindPinInput();
+  },
+
+  doSetupConfirm: function() {
+    var self = this;
+    var pin = this._pinBuf;
+    if (pin.length < 6) { showToast('请输入6位数字密码'); return; }
+
+    if (this._setupStep === 1) {
+      // 第一步完成，进入第二步确认
+      this._setupFirstPin = pin;
+      this._setupStep = 2;
+      this._pinBuf = '';
+      var dots = document.querySelectorAll('.pin-dot');
+      dots.forEach(function(d){ d.classList.remove('filled'); });
+      var hint = document.getElementById('pin-hint');
+      if (hint) hint.textContent = '请再次输入密码确认';
+      var btn = document.getElementById('pin-confirm');
+      if (btn) { btn.textContent = '✅ 完成设置'; btn.style.display = 'none'; }
+    } else {
+      // 第二步，验证两次密码一致
+      if (pin !== this._setupFirstPin) {
+        showToast('❌ 两次密码不一致，请重新输入');
+        this._setupStep = 1;
+        this._setupFirstPin = '';
+        this._pinBuf = '';
+        var dots = document.querySelectorAll('.pin-dot');
+        dots.forEach(function(d){ d.classList.remove('filled'); });
+        var hint = document.getElementById('pin-hint');
+        if (hint) hint.textContent = '6位数字密码 · 用来加密保护你的数据';
+        var btn = document.getElementById('pin-confirm');
+        if (btn) { btn.textContent = '✅ 确认密码'; btn.style.display = 'none'; }
+        return;
+      }
+      var nickInput = document.getElementById('setup-nickname');
+      var nickname = nickInput ? nickInput.value.trim() : '';
+      if (!nickname) { showToast('请先输入昵称'); return; }
+      if (setupAccount(nickname, pin)) {
+        showToast('设置成功！欢迎 ' + nickname);
+        self.renderHome();
+      }
+    }
+  },
+
+  doLogin: function() {
+    var pin = this._pinBuf;
+    if (pin.length < 6) { showToast('请输入6位数字密码'); return; }
+    if (loginCheck(pin)) {
+      showToast('欢迎回来，'+getNickname()+' ☁️');
+      this.renderHome();
+    } else {
+      showToast('❌ 密码错误');
+      this._pinBuf = '';
+      var dots = document.querySelectorAll('.pin-dot');
+      dots.forEach(function(d){ d.classList.remove('filled'); });
+      var btn = document.getElementById('pin-confirm');
+      if (btn) btn.style.display = 'none';
+    }
+  },
+
+  _bindPinInput: function() {
+    var self = this;
+    var dots = document.querySelectorAll('.pin-dot');
+    this._pinBuf = '';
+    document.querySelectorAll('.pin-key').forEach(function(k) {
+      k.addEventListener('click', function() {
+        var v = this.dataset.k;
+        if (v === '⌫') { self._pinBuf = self._pinBuf.slice(0,-1); }
+        else { if (self._pinBuf.length < 6) self._pinBuf += v; }
+        dots.forEach(function(d,i){ d.classList.toggle('filled', i<self._pinBuf.length); });
+        // 输满6位才显示确认按钮
+        var btn = document.getElementById('pin-confirm');
+        if (btn) btn.style.display = self._pinBuf.length === 6 ? 'block' : 'none';
+      });
+    });
+  },
+
+  render: function(html, screen) {
+    var app = $('app');
+    app.innerHTML = html;
+    app.scrollIntoView({behavior:'smooth'});
+    this._currentScreen = screen;
+  },
+
+  _nav: function(active) {
+    var items = [
+      { id:'home', e:'🏠', l:'首页' },
+      { id:'history', e:'📅', l:'历史' },
+      { id:'weekly', e:'📊', l:'周报' },
+      { id:'settings', e:'⚙️', l:'设置' }
+    ];
+    var h = '<div class="nav">';
+    items.forEach(function(it) {
+      var cls = it.id===active ? ' nav-btn active' : 'nav-btn';
+      h += '<button class="'+cls+'" onclick="App.showScreen(\''+it.id+'\')"><span class="nav-emoji">'+it.e+'</span>'+it.l+'</button>';
+    });
+    h += '</div>';
+    return h;
+  },
+
+  showScreen: function(screen) {
+    switch(screen) {
+      case 'home': this.renderHome(); break;
+      case 'history': this.showHistory(); break;
+      case 'weekly': this.showReport('weekly'); break;
+      case 'monthly': this.showReport('monthly'); break;
+      case 'settings': this.showSettings(); break;
+    }
+  }
+};
+
+/* ========== 🚀 启动 ========== */
+(function init() {
+  // 先确认基本渲染可用
+  if (needsSetup()) {
+    App.renderSetup();
+  } else {
+    App.renderLogin();
+  }
+})();
+</script>
+</body>
+</html>
