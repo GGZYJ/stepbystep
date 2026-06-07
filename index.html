@@ -860,11 +860,16 @@ var App = {
 
 /* ========== 🚀 启动 ========== */
 (function init() {
-  // 先确认基本渲染可用
   if (needsSetup()) {
     App.renderSetup();
   } else {
     App.renderLogin();
+  }
+  // 后台注册 Service Worker（离线支持 + PWA 安装）
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('/sw.js').catch(function(){});
+    });
   }
 })();
 </script>
